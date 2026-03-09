@@ -21,6 +21,27 @@ const groceryItems = [
     }
 ];
 
+export default function App() {
+    const [items, setItems] = useState(groceryItems);
+
+    function handleAddItem(item) {
+        setItems([...items, item]);
+    }
+
+    function handleDeleteItem(id) {
+        setItems((items) => items.filter((item) => item.id !== id)); //mengembalikan array baru selain id yang di delete
+    }
+
+    return (
+        <div className="app">
+            <Header />
+            <Form onAddItems={handleAddItem} />
+            <GroceryList items={items} onDeleteItem={handleDeleteItem} />
+            <Footer />
+        </div>
+    );
+}
+
 function Header() {
     return <h1>Catatan Belanjaku 📝</h1>;
 }
@@ -75,13 +96,19 @@ function Form({ onAddItems }) {
     );
 }
 
-function GroceryList({ items }) {
+function GroceryList({ items, onDeleteItem }) {
     return (
         <>
             <div className="list">
                 <ul>
                     {items.map((item) => {
-                        return <Item item={item} key={item.id} />;
+                        return (
+                            <Item
+                                item={item}
+                                key={item.id}
+                                onDeleteItem={onDeleteItem}
+                            />
+                        );
                     })}
                 </ul>
             </div>
@@ -101,7 +128,7 @@ function GroceryList({ items }) {
     );
 }
 
-function Item({ item }) {
+function Item({ item, onDeleteItem }) {
     return (
         <li key={item.id}>
             <input type="checkbox" />
@@ -110,7 +137,7 @@ function Item({ item }) {
             >
                 {item.quantity} {item.name}
             </span>
-            <button>&times;</button>
+            <button onClick={() => onDeleteItem(item.id)}>&times;</button>
         </li>
     );
 }
@@ -120,22 +147,5 @@ function Footer() {
         <footer className="stats">
             Ada 10 barang di daftar belanjaan, 5 barang sudah dibeli (50%)
         </footer>
-    );
-}
-
-export default function App() {
-    const [items, setItems] = useState(groceryItems);
-
-    function handleAddItem(item) {
-        setItems([...items, item]);
-    }
-
-    return (
-        <div className="app">
-            <Header />
-            <Form onAddItems={handleAddItem} />
-            <GroceryList items={items} />
-            <Footer />
-        </div>
     );
 }
