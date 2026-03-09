@@ -25,12 +25,14 @@ function Header() {
     return <h1>Catatan Belanjaku 📝</h1>;
 }
 
-function Form() {
+function Form({ onAddItems }) {
     const [name, setName] = useState("");
     const [quantity, setQuantity] = useState(1);
 
     function handleSubmit(e) {
         e.preventDefault();
+
+        if (!name) return;
 
         const newItem = {
             name,
@@ -38,6 +40,7 @@ function Form() {
             checked: false,
             id: Date.now()
         };
+        onAddItems(newItem);
 
         console.log(newItem);
 
@@ -55,7 +58,7 @@ function Form() {
             <h3>Hari ini belanja apa kita?</h3>
             <div>
                 <select
-                    onChange={(e) => setQuantity(e.target.value)}
+                    onChange={(e) => setQuantity(Number(e.target.value))}
                     value={quantity}
                 >
                     {quantityNum}
@@ -72,12 +75,12 @@ function Form() {
     );
 }
 
-function GroceryList() {
+function GroceryList({ items }) {
     return (
         <>
             <div className="list">
                 <ul>
-                    {groceryItems.map((item) => {
+                    {items.map((item) => {
                         return <Item item={item} key={item.id} />;
                     })}
                 </ul>
@@ -121,11 +124,17 @@ function Footer() {
 }
 
 export default function App() {
+    const [items, setItems] = useState(groceryItems);
+
+    function handleAddItem(item) {
+        setItems([...items, item]);
+    }
+
     return (
         <div className="app">
             <Header />
-            <Form />
-            <GroceryList />
+            <Form onAddItems={handleAddItem} />
+            <GroceryList items={items} />
             <Footer />
         </div>
     );
