@@ -32,11 +32,28 @@ export default function App() {
         setItems((items) => items.filter((item) => item.id !== id)); //mengembalikan array baru selain id yang di delete
     }
 
+    function handleToggleItem(id) {
+        setItems((items) =>
+            items.map((item) =>
+                item.id === id ? { ...item, checked: !item.checked } : item
+            )
+        );
+    }
+
+    function handleClearItems() {
+        setItems([]);
+    }
+
     return (
         <div className="app">
             <Header />
             <Form onAddItems={handleAddItem} />
-            <GroceryList items={items} onDeleteItem={handleDeleteItem} />
+            <GroceryList
+                items={items}
+                onDeleteItem={handleDeleteItem}
+                onToggleItem={handleToggleItem}
+                onClearItems={handleClearItems}
+            />
             <Footer />
         </div>
     );
@@ -96,24 +113,60 @@ function Form({ onAddItems }) {
     );
 }
 
-function GroceryList({ items, onDeleteItem }) {
+function GroceryList({ items, onDeleteItem, onToggleItem, onClearItems }) {
+    const [sortBy, setSortBy] = useState("input");
+
+    let sortedItems;
+    if (sortBy === "input") {
+        sortedItems = items;
+    }
+
+    if (sortBy === "name") {
+        sortedItems = items
+            .slice()
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    if (sortBy === "checked") {
+        sortedItems = items;
+    }
+
+    switch (sortBy) {
+        case "name":
+            sortedItems = items
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        case "checked":
+            sortedItems = items
+                .slice()
+                .sort((a, b) => Number(a.checked) - Number(b.checked));
+            break;
+        default:
+            sortedItems = items;
+    }
+
     return (
         <>
             <div className="list">
                 <ul>
-                    {items.map((item) => {
+                    {sortedItems.map((item) => {
                         return (
                             <Item
                                 item={item}
                                 key={item.id}
                                 onDeleteItem={onDeleteItem}
+                                onToggleItem={onToggleItem}
                             />
                         );
                     })}
                 </ul>
             </div>
             <div className="actions">
-                <select>
+                <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                >
                     <option value="input">
                         Urutkan berdasarkan urutan input
                     </option>
@@ -122,16 +175,20 @@ function GroceryList({ items, onDeleteItem }) {
                     </option>
                     <option value="checked">Urutkan berdasarkan ceklis</option>
                 </select>
-                <button>Bersihkan Daftar</button>
+                <button onClick={onClearItems}>Bersihkan Daftar</button>
             </div>
         </>
     );
 }
 
-function Item({ item, onDeleteItem }) {
+function Item({ item, onDeleteItem, onToggleItem }) {
     return (
         <li key={item.id}>
-            <input type="checkbox" />
+            <input
+                type="checkbox"
+                checked={item.checked}
+                onChange={() => onToggleItem(item.id)}
+            />
             <span
                 style={item.checked ? { textDecoration: "line-through" } : {}}
             >
